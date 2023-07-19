@@ -9,7 +9,7 @@ $rows = [
 
 for ($i = 0; $i < count($rows); $i++) {
 	$id = $rows[$i]["ID"];
-	$rows[$i]["link"] = "<a href='?action=stats&mode=detail&id=$id'>Link</a>";
+	$rows[$i]["dettaglio"] = "<a href='?action=stats&mode=detail&id=$id'>link</a>";
 }
 ?>
 

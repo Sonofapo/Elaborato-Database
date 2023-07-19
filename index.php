@@ -2,9 +2,9 @@
 
 	require "./src/configure.php";
 
-	$_VARS["action"] = isset($_SESSION["uid"]) ? ($_REQUEST["action"] ?? "show") : "user";
+	$_VARS["action"] = isset($_SESSION["uid"]) ? ($_REQUEST["action"] ?? "stats") : "user";
 	if (isset($_SESSION["uid"])) {
-		$_VARS["mode"] = $_REQUEST["mode"] ?? "show";
+		$_VARS["mode"] = $_REQUEST["mode"] ?? "stats";
 	} else if (isset($_REQUEST["mode"]) && $_REQUEST["mode"] == "subscribe") {
 		$_VARS["mode"] = "subscribe";
 	} else {
@@ -16,7 +16,7 @@
 		case "user":
 			require "./src/login/controller.php";
 			break;
-		case "show":
+		case "stats":
 			require "./src/stats/controller.php";
 			break;
 	}

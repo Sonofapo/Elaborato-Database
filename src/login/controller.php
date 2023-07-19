@@ -25,6 +25,9 @@ switch ($_VARS["mode"]) {
 		session_unset();
 		session_destroy();
 		header("Location: index.php");
+	case "delete":
+		$db->deleteUser($_SESSION["uid"]);
+		break;
 }
 
 

@@ -26,8 +26,12 @@ class DB {
 	}
 
 	public function login($username, $password) {
-		$res = $this->query("SELECT * FROM utente WHERE username = ? AND password = ?",	[$username, $password] , "ss");
+		$res = $this->query("SELECT * FROM utente WHERE username = ? AND password = ?", [$username, $password] , "ss");
 		return count($res) == 1;
+	}
+
+	public function deleteUser($username) {
+		$this->query("UPDATE utente SET password = null WHERE username = ?", [$username] , "s");
 	}
 
 }

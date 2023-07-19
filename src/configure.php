@@ -16,4 +16,21 @@ function get_include_contents(string $file) {
 	throw new ErrorException("$file not found");
 }
 
+function generate_table($rows) {
+	if (count($rows) == 0) return "";
+
+	$s = "<table><tr>";
+	foreach (array_keys($rows[0]) as $e)
+		$s .= "<th>" . $e . "</th>";
+	$s .= "</tr>";
+	foreach ($rows as $e) {
+		$s .= "<tr>";
+		foreach ($e as $v)
+			$s .= "<td>" . $v . "</td>";
+		$s .= "</tr>";
+	}
+	$s .= "</table>";
+	return $s;
+}
+
 ?>

@@ -1,0 +1,14 @@
+table, td, th {
+	border: 1px solid black;
+	border-collapse: collapse;
+	padding: 5px;
+}
+
+li {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+a {
+	text-decoration: none;
+}

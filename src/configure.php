@@ -1,6 +1,6 @@
 <?php
 
-require "./src/database/DB.class.php";
+require "./src/class/DB.class.php";
 $db = new DB();
 
 session_start();

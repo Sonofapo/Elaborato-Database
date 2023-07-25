@@ -112,7 +112,7 @@ class Game {
 		$teams = [ 0 => $attackers, 1 => $defenders ]; # copy and remap
 		$kills = rand(1, 10); # number of kills in this round
 		
-		$time = rand(15, 25); # random time at first kill
+		$duration = rand(15, 25); # random time at first kill
 		# until players exist or enough kills are generated
 		for ($i = 0; count($teams[0]) && count($teams[1]) && $i < $kills; $i++) {
 			$c = rand(0, 1); # randomly choose offender side
@@ -123,11 +123,10 @@ class Game {
 			unset($teams[$s][$key]); # remove killed player
 				
 			$arma = $gc["a"][rand() % 2]; # select random weapon
-			$this->DB->saveKill($this->Codice, $this->round, $gs["c"], $gc["c"], gmdate("H:i:s", $time), $arma);
-			$time = $time + rand(1, 20); # new random time for next kill
+			$this->DB->saveKill($this->Codice, $this->round, $gs["c"], $gc["c"], gmdate("H:i:s", $duration), $arma);
+			$duration = $duration + rand(1, 20); # new random time for next kill
 		}
 
-		$duration = $time + rand(5, 10);
 		if (!count($teams[0])) return Game::A_TEAM_KILL;
 		if (!count($teams[1])) return Game::D_TEAM_KILL;
 		return $teams;

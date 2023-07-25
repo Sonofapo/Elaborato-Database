@@ -18,19 +18,19 @@ class Game {
 	function __construct($DB) {
 		$this->DB = $DB;
 		$map = $this->DB->getRandomMap()[0];
-		$this->sites = array_slice(['A','B','C'], 0, $map["NumeroSiti"]); # N -> [A..C]
+		$this->sites = array_slice([ 'A', 'B', 'C' ], 0, $map["NumeroSiti"]); # N -> [A..C]
 		$this->Codice = $this->DB->createMatch($map["Nome"]);
 		$this->composeTeams();
 		$this->round = 1;
-		$this->score = ["Alpha" => 0, "Beta" => 0];
-		$this->role = ["Attacco", "Difesa"][rand() % 2]; # randomly choose alpha team role
+		$this->score = [ "Alpha" => 0, "Beta" => 0 ];
+		$this->role = [ "Attacco", "Difesa" ][rand() % 2]; # randomly choose alpha team role
 	}
 
 	public function composeTeams() {
-		$users = array_combine(["Alpha", "Beta"], array_chunk($this->DB->getRandomUsers(), 5));
+		$users = array_combine([ "Alpha", "Beta" ], array_chunk($this->DB->getRandomUsers(), 5));
 		$this->Alpha = $this->DB->getRandomAgents();
 		$this->Beta  = $this->DB->getRandomAgents();
-		foreach (["Alpha", "Beta"] as $team)
+		foreach ([ "Alpha", "Beta" ] as $team)
 			for ($i = 0; $i < count($this->$team); $i++)
 				$this->$team[$i] = $this->generatePlayer($users[$team][$i], $this->$team[$i], $team);
 	}
@@ -42,7 +42,7 @@ class Game {
 	}
 
 	public function generateRound() {
-		foreach (["Alpha", "Beta"] as $team) { # random purchases for each team
+		foreach ([ "Alpha", "Beta" ] as $team) { # random purchases for each team
 			foreach ($this->$team as &$t) { # and for each member
 				if (rand() % 100 < 70) {
 					$t["a"][] = $armaP = $this->DB->getRandomWeapon("Primaria");
@@ -88,12 +88,14 @@ class Game {
 		# check for round conditions
 		if (in_array(12, $this->score)) { # role swap
 			$this->role = $this->role == "Attacco" ? "Difesa" : "Attacco";
-		} else if (in_array(13, $this->score)) { # a team won this match
+		} else if (max($this->score) == 13 || rand() % 100 < 5) { # team wins or sudden ending
+			$maxR = max($this->score);
+			$team = array_search($maxR, $this->score);
 			return [
 				"durata"  => gmdate("H:i:s", $this->duration),
-				"squadra" => array_search(13, $this->score),
+				"squadra" => $team,
 				"roundT"  => $this->round,
-				"roundV"  => 13
+				"roundV"  => $maxR,
 			];
 		}
 

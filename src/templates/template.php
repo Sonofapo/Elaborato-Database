@@ -10,5 +10,6 @@
 </head>
 <body>
 	<?php echo $_VARS["body"] ?>
+	<div style="margin-top: 10px">Torna alla <a href="index.php">home</a></div>
 </body>
 </html>

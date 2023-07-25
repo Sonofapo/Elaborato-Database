@@ -1,26 +1,18 @@
 <h1>Storico delle partite giocate</h1>
 
 <?php
-# TODO: REMOVE
-$rows = [
-	[ "ID" => "1", "mappa" => "Ascent", "esito" => "Vittoria", "durata" => "6:45" ],
-	[ "ID" => "2", "mappa" => "Heaven", "esito" => "Sconfitta", "durata" => "3:30" ],
-];
-
-for ($i = 0; $i < count($rows); $i++) {
-	$id = $rows[$i]["ID"];
-	$rows[$i]["dettaglio"] = "<a href='?action=stats&mode=detail&id=$id'>link</a>";
-}
+# get all matches and add detail link
+foreach ($_VARS["rows"] as &$r)
+	$r["Dettaglio"] = "<a href='?action=stats&mode=detail&id={$r["Codice"]}'>link</a>";
 ?>
 
-<?php if ($table = generate_table($rows)): echo $table; else: ?>
-<div>Non hai ancora giocato partite. <a href="index.php">Torna al menu</a></div>
+<?php if ($table = generate_table($_VARS["rows"])): echo $table; else: ?>
+<div>Non hai ancora giocato partite.</div>
 <?php endif ?>
 
-
-<h1>Funzionalità aggiuntive</h1>
+<h2>Funzionalità aggiuntive</h2>
 <ul>
-	<li><a href="?action=stats&mode=perc">Percentuale vittorie</a></li>
-	<li><a href="?action=stats&mode=weapon3">Top 3 armi più utilizzate</a></li>
-	<li><a href="?action=stats&mode=maps3">Top 3 mappe più giocate</a></li>
+	<li><a href="?action=stats&mode=op4">Operazione 4</a> - Percentuale vittorie</li>
+	<li><a href="?action=stats&mode=op5">Operazione 5</a> - Top 3 armi più utilizzate</li>
+	<li><a href="?action=stats&mode=op6">Operazione 6</a> - Top 3 mappe più giocate</li>
 </ul>

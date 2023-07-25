@@ -15,19 +15,19 @@ class Game {
 	private $Alpha;    # alpha team members (do not delete, it is used with variable name)
 	private $Beta;     # beta team members (do not delete, it is used with variable name)
 
-	function __construct($DB) {
+	function __construct($DB, $username) {
 		$this->DB = $DB;
 		$map = $this->DB->getRandomMap()[0];
 		$this->sites = array_slice([ 'A', 'B', 'C' ], 0, $map["NumeroSiti"]); # N -> [A..C]
 		$this->Codice = $this->DB->createMatch($map["Nome"]);
-		$this->composeTeams();
+		$this->composeTeams($username);
 		$this->round = 1;
 		$this->score = [ "Alpha" => 0, "Beta" => 0 ];
 		$this->role = [ "Attacco", "Difesa" ][rand() % 2]; # randomly choose alpha team role
 	}
 
-	public function composeTeams() {
-		$users = array_combine([ "Alpha", "Beta" ], array_chunk($this->DB->getRandomUsers(), 5));
+	public function composeTeams($username) {
+		$users = array_combine([ "Alpha", "Beta" ], array_chunk($this->DB->getRandomUsers($username), 5));
 		$this->Alpha = $this->DB->getRandomAgents();
 		$this->Beta  = $this->DB->getRandomAgents();
 		foreach ([ "Alpha", "Beta" ] as $team)
@@ -42,15 +42,15 @@ class Game {
 	}
 
 	public function generateRound() {
+		$this->DB->createRound($this->Codice, $this->round);
+
 		foreach ([ "Alpha", "Beta" ] as $team) { # random purchases for each team
 			foreach ($this->$team as &$t) { # and for each member
+				$t["a"][] = $armaS = $this->DB->getRandomWeapon("Secondaria")[0]["Nome"];
+				$this->DB->savePurchase($this->Codice, $this->round, $armaS, $t["c"]);
 				if (rand() % 100 < 70) {
-					$t["a"][] = $armaP = $this->DB->getRandomWeapon("Primaria");
+					$t["a"][] = $armaP = $this->DB->getRandomWeapon("Primaria")[0]["Nome"];
 					$this->DB->savePurchase($this->Codice, $this->round, $armaP, $t["c"]);
-				}
-				if (rand() % 100 < 40) {
-					$t["a"][] = $armaS = $this->DB->getRandomWeapon("Secondaria");
-					$this->DB->savePurchase($this->Codice, $this->round, $armaS, $t["c"]);
 				}
 			}
 		}
@@ -67,8 +67,8 @@ class Game {
 			$ruolo = "Difesa";
 		} else if ($outcome !== Game::D_TEAM_KILL) { # no team kill, try to plant spike
 			$sito = $this->sites[rand() % count($this->sites)]; # select random site
-			$giocatoreA = $outcome[0][rand() % count($outcome[0])]["c"]; # who will plant
-			$giocatoreD = $outcome[1][rand() % count($outcome[1])]["c"]; # who will defuse
+			$giocatoreA = $outcome[0][array_rand($outcome[0])]["c"]; # who will plant
+			$giocatoreD = $outcome[1][array_rand($outcome[1])]["c"]; # who will defuse
 			if (rand(0, 1)) { # spike planted
 				$this->DB->saveAction($this->Codice, $this->round, "Innesco", $giocatoreA, $sito);
 				# attackers were previously set as winners
@@ -88,9 +88,12 @@ class Game {
 		# check for round conditions
 		if (in_array(12, $this->score)) { # role swap
 			$this->role = $this->role == "Attacco" ? "Difesa" : "Attacco";
-		} else if (max($this->score) == 13 || rand() % 100 < 5) { # team wins or sudden ending
-			$maxR = max($this->score);
-			$team = array_search($maxR, $this->score);
+		} else if (max($this->score) == 13 || rand() % 100 < 2) { # team wins or sudden ending
+			$maxR =  max($this->score);
+			if ($this->score["Alpha"] == $this->score["Beta"]) # tie
+				$team = null;
+			else
+				$team = array_search($maxR, $this->score);
 			return [
 				"durata"  => gmdate("H:i:s", $this->duration),
 				"squadra" => $team,
@@ -122,7 +125,7 @@ class Game {
 			$gs = $teams[$s][$key = array_rand($teams[$s], 1)]; # killed player
 			unset($teams[$s][$key]); # remove killed player
 				
-			$arma = $gc["a"][rand() % 2]; # select random weapon
+			$arma = $gc["a"][rand() % count($gc["a"])]; # select random weapon
 			$this->DB->saveKill($this->Codice, $this->round, $gs["c"], $gc["c"], gmdate("H:i:s", $duration), $arma);
 			$duration = $duration + rand(1, 20); # new random time for next kill
 		}

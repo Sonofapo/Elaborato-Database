@@ -1,6 +1,7 @@
 <?php
 
 require "./src/class/DB.class.php";
+require "./src/class/Game.class.php";
 $db = new DB();
 
 session_start();

@@ -27,7 +27,7 @@ function generate_table($rows) {
 	foreach ($rows as $e) {
 		$s .= "<tr>";
 		foreach ($e as $v)
-			$s .= "<td>" . $v . "</td>";
+			$s .= "<td>" . ($v ?? "Nessun risultato") . "</td>";
 		$s .= "</tr>";
 	}
 	$s .= "</table>";

@@ -1,5 +1,4 @@
 <?php
-
 	require "./src/configure.php";
 
 	$_VARS["action"] = isset($_SESSION["uid"]) ? ($_REQUEST["action"] ?? "stats") : "user";
@@ -11,7 +10,6 @@
 		$_VARS["mode"] = "login";
 	}
 
-	
 	switch ($_VARS["action"]) {
 		case "user":
 			require "./src/login/controller.php";
@@ -20,8 +18,6 @@
 			require "./src/stats/controller.php";
 			break;
 	}
-
 			
 	require "./src/templates/template.php";
-
 ?>

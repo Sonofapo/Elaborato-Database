@@ -13,6 +13,7 @@
 	</button>
 </form>
 
+<br>
 <div>
 	Clicca 
 	<a href="?action=user&mode=<?php echo $_VARS["mode"] == "login" ? "subscribe" : "login" ?>">qui</a>

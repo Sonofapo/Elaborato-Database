@@ -69,10 +69,10 @@ class Game {
 			$sito = $this->sites[rand() % count($this->sites)]; # select random site
 			$giocatoreA = $outcome[0][array_rand($outcome[0])]["c"]; # who will plant
 			$giocatoreD = $outcome[1][array_rand($outcome[1])]["c"]; # who will defuse
-			if (rand(0, 1)) { # spike planted
+			if (rand() % 100 < 80) { # spike planted
 				$this->DB->saveAction($this->Codice, $this->round, "Innesco", $giocatoreA, $sito);
 				# attackers were previously set as winners
-				if (rand(0, 1)) { # successful defuse, defenders win
+				if (rand() % 100 < 30) { # successful defuse, defenders win
 					$this->DB->saveAction($this->Codice, $this->round, "Disinnesco", $giocatoreD, $sito);
 					$squadra = $defenders;
 					$ruolo = "Difesa";
@@ -86,7 +86,7 @@ class Game {
 		$this->DB->saveRound($this->Codice, $this->round, gmdate("H:i:s", $durata), $squadra, $ruolo);
 		
 		# check for round conditions
-		if (in_array(12, $this->score)) { # role swap
+		if ($this->round == 12) { # role swap
 			$this->role = $this->role == "Attacco" ? "Difesa" : "Attacco";
 		} else if (max($this->score) == 13 || rand() % 100 < 2) { # team wins or sudden ending
 			$maxR =  max($this->score);
@@ -113,7 +113,7 @@ class Game {
 
 	function generateRandomKills($attackers, $defenders, &$duration) {
 		$teams = [ 0 => $attackers, 1 => $defenders ]; # copy and remap
-		$kills = rand(1, 10); # number of kills in this round
+		$kills = rand(3, 10); # number of kills in this round
 		
 		$duration = rand(15, 25); # random time at first kill
 		# until players exist or enough kills are generated
@@ -127,7 +127,11 @@ class Game {
 				
 			$arma = $gc["a"][rand() % count($gc["a"])]; # select random weapon
 			$this->DB->saveKill($this->Codice, $this->round, $gs["c"], $gc["c"], gmdate("H:i:s", $duration), $arma);
-			$duration = $duration + rand(1, 20); # new random time for next kill
+			$duration = $duration + rand(15, 30); # new random time for next kill
+			if ($duration > 180) { # round timeout, defenders win
+				$duration = 180;
+				return Game::A_TEAM_KILL;
+			}
 		}
 
 		if (!count($teams[0])) return Game::A_TEAM_KILL;

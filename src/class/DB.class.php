@@ -111,17 +111,16 @@ class DB {
 	/** STATISTIC FUNCTIONS */
 	# operazione 3
 	public function esitoPartite($username) {
-		return $this->query("SELECT Codice, Data, NomeMappa AS Mappa, DurataTotale AS Durata,
-			IF(SquadraVincente IS NULL, ?, IF(SquadraVincente = NomeSquadra, ?, ?))
-			AS Esito FROM partite_utente WHERE UsernameUtente = ?",
-			["Pareggio", "Vittoria", "Sconfitta", $username], "ssss");
+		return $this->query('SELECT Codice, Data, NomeAgente, NomeMappa, DurataTotale,
+			IF(SquadraVincente IS NULL, "Pareggio", IF(SquadraVincente = NomeSquadra, "Vittoria", "Sconfitta"))
+			AS Esito FROM partite_utente WHERE UsernameUtente = ?', [$username], "s");
 	}
 
 	# operazione 4
 	public function precentualeVittorie($username, $from, $to) {
 		return $this->query("SELECT COUNT(*) * 100.0 / (SELECT COUNT(*) FROM partite_utente
-			WHERE UsernameUtente = ? AND Data BETWEEN ? AND ?) AS Percentuale FROM partite_utente
-	  		WHERE UsernameUtente = ? AND Data BETWEEN ? AND ? AND NomeSquadra = SquadraVincente",
+			WHERE UsernameUtente = ? AND CAST(Data AS DATE) BETWEEN ? AND ?) AS Percentuale FROM partite_utente
+	  		WHERE UsernameUtente = ? AND CAST(Data AS DATE) BETWEEN ? AND ? AND NomeSquadra = SquadraVincente",
 			[$username, $from, $to, $username, $from, $to], "ssssss");
 	}
 
@@ -139,7 +138,7 @@ class DB {
 	# operazione 6
 	public function classificaMappe($username, $from, $to) {
 		return $this->query("SELECT p.NomeMappa, COUNT(*) As Totale FROM partite p, giocatori g
-			WHERE g.UsernameUtente = ? AND g.CodicePartita = p.Codice AND p.Data BETWEEN ? AND ?
+			WHERE g.UsernameUtente = ? AND g.CodicePartita = p.Codice AND CAST(p.Data AS DATE) BETWEEN ? AND ?
 			GROUP BY p.NomeMappa ORDER BY Totale DESC LIMIT 3", [$username, $from, $to], "sss");
 	}
 
@@ -151,23 +150,25 @@ class DB {
 
 	# operazione 9.0
 	public function esitoRound($squadra, $codice, $numero) {
-		return $this->query("SELECT Numero, Durata, IF(SquadraVincente = ?, ?, ?) AS Esito
-				FROM round WHERE CodicePartita = ? AND Numero = ?",
-			[$squadra, 'Vittoria', 'Sconfitta', $codice, $numero], "sssii");
+		return $this->query('SELECT Numero, Durata, IF(SquadraVincente = ?, RuoloVincente, 
+			IF(RuoloVincente = "Attacco", "Difesa", "Attacco")) AS Ruolo,
+			IF(SquadraVincente = ?, "Vittoria", "Sconfitta") AS Esito FROM round WHERE CodicePartita = ?
+			AND Numero = ?', [$squadra, $squadra, $codice, $numero], "ssii");
 	}
 
 	# operazione 9.1
 	public function elencoAzioni($codice, $numero) {
 		return $this->query("SELECT g.NomeAgente, g.NomeSquadra, a.Tipo, a.Sito FROM giocatori g, azioni a
-			WHERE a.CodicePartita = ? AND a.NumeroRound = ? AND a.CodiceGiocatore = g.Codice",
+			WHERE a.CodicePartitaRound = ? AND a.NumeroRound = ? AND a.CodiceGiocatore = g.Codice",
 			[$codice, $numero], "ii");
 	}
 
 	# operazione 9.2
 	public function elencoUccisioni($codice, $numero) {
-		return $this->query("SELECT u.NumeroRound, u.Istante, gc.NomeAgente AS CausataDa, gs.NomeAgente
-			AS SubitaDa, u.NomeArma FROM giocatori gc, giocatori gs, uccisioni u WHERE u.CodicePartita = ?
-			AND u.NumeroRound = ? AND u.CodiceGiocatoreC = gc.Codice AND u.CodiceGiocatoreS = gs.Codice",
+		return $this->query('SELECT u.Istante, CONCAT(gc.NomeAgente, " (", gc.NomeSquadra, ")") AS CausataDa,
+			CONCAT(gs.NomeAgente, " (", gs.NomeSquadra, ")") AS SubitaDa, u.NomeArma FROM giocatori gc,
+			giocatori gs, uccisioni u WHERE u.CodicePartitaRound = ? AND u.NumeroRound = ?
+			AND u.CodiceGiocatoreC = gc.Codice AND u.CodiceGiocatoreS = gs.Codice ORDER BY u.Istante',
 			[$codice, $numero], "ii");
 	}
 
@@ -180,22 +181,21 @@ class DB {
 
 	# operazione 11
 	public function scontriDiretti($codice, $giocatore) {
-		return $this->query("SELECT u.NumeroRound, IF(gc.Codice = ?, gs.NomeAgente, gc.NomeAgente)
-			AS Contro, IF(gc.Codice = ?, ?, ?) AS Esito, u.NomeArma
+		return $this->query('SELECT u.NumeroRound, IF(gc.Codice = ?, gs.NomeAgente, gc.NomeAgente)
+			AS Contro, IF(gc.Codice = ?, "Vinto", "Perso") AS Esito, u.NomeArma
 			FROM giocatori gc, giocatori gs, uccisioni u WHERE u.CodicePartitaRound = ?
 			AND (gc.Codice = ? OR gs.Codice = ?) AND u.CodiceGiocatoreC = gc.Codice
-			AND u.CodiceGiocatoreS = gs.Codice",
-			[$giocatore, $giocatore, 'Vinto', 'Perso', $codice, $giocatore, $giocatore], "iissiii");
+			AND u.CodiceGiocatoreS = gs.Codice',
+			[$giocatore, $giocatore, $codice, $giocatore, $giocatore], "iiiii");
 	}
 
 	# operazione 12
-	# [TODO: RIFARE QUERY 12, SBAGLIATA? UCCISIONI INCONSISTENTI: ARMA NON POSSEDUTA]
 	public function conteggioEliminazioni($codice, $giocatore) {
-		return $this->query("SELECT p.NomeArma, COUNT(DISTINCT p.CodicePartitaRound, p.NumeroRound,
-			p.NomeArma, p.CodiceGiocatore) AS Possessi FROM round r, possessi p, uccisioni u
-	  		WHERE r.CodicePartita = ? AND r.Numero = p.NumeroRound AND p.CodiceGiocatore = ?
-			AND p.CodiceGiocatore = u.CodiceGiocatoreC AND p.NomeArma = u.NomeArma GROUP BY p.NomeArma",
-	  		[$codice, $giocatore], "ii");
+		return $this->query("SELECT p.NomeArma, COUNT(u.NumeroRound) AS TotaleUccisioni FROM possessi p
+			LEFT JOIN uccisioni u ON u.CodicePartitaRound = p.CodicePartitaRound
+			AND u.NumeroRound = p.NumeroRound AND u.CodiceGiocatoreC = p.CodiceGiocatore
+			AND u.NomeArma = p.NomeArma WHERE p.CodicePartitaRound = ? AND p.CodiceGiocatore = ?
+			GROUP BY p.NomeArma", [$codice, $giocatore], "ii");
 	}
 
 	/** SUPPORT FUNCTIONS */

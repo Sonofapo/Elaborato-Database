@@ -1,16 +1,11 @@
 <h1>Partita <?php echo $_VARS["match"] ?> - Esito: <?php echo $_VARS["outcome"] ?></h1>
 
-<!-- <?php
-# get all matches and add detail link
-$rows = $db->esitoPartite($_SESSION["uid"]);
-foreach ($rows as &$r)
-	$r["Dettaglio"] = "<a href='?action=stats&mode=detail&id={$r["Codice"]}'>link</a>";
+<?php
+foreach ($_VARS["rows"] as &$r)
+	$r["Dettaglio"] = "<a href='?action=stats&mode=round&id={$_VARS["match"]}&num={$r["Numero"]}'>link</a>";
+$table = generate_table($_VARS["rows"]);
+echo $table;
 ?>
-
-<?php if ($table = generate_table($rows)): echo $table; else: ?>
-<div>Non hai ancora giocato partite.</div>
-<?php endif ?>
--->
 
 <h2>Funzionalità aggiuntive</h2>
 <ul>

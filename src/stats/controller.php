@@ -8,14 +8,31 @@ switch ($_VARS["mode"]) {
 		$_VARS["rows"] = $db->esitoPartite($_SESSION["uid"]);
 		$_VARS["body"] = get_include_contents("./src/stats/games.php");
 		break;
-	case "detail";
+	case "detail"; # op8/op9/op10
+		# outcome
 		$_VARS["match"] = $_GET["id"];
-		$res = $db->conteggioRound($_GET["id"])[0];
-		if ($res["SquadraVincente"] == $db->getTeam($_SESSION["uid"], $_GET["id"])[0]["NomeSquadra"])
+		$res  = $db->conteggioRound($_GET["id"])[0];
+		$team = $db->getTeam($_SESSION["uid"], $_GET["id"]);
+		if ($res["SquadraVincente"] == $team)
 			$_VARS["outcome"] = "{$res["RoundVinti"]}-{$res["RoundPersi"]}";
 		else
 			$_VARS["outcome"] = "{$res["RoundPersi"]}-{$res["RoundVinti"]}";
+		# round list
+		$armi = $db->storicoArmi($_GET["id"], $db->getGiocatore($_SESSION["uid"], $_GET["id"]));
+		for ($i = 1; $i <= $res["RoundVinti"] + $res["RoundPersi"]; $i++) {
+			$r = $db->esitoRound($team, $_GET["id"], $i)[0];
+			$a = array_filter($armi, fn($x) => $x["NumeroRound"] == $r["Numero"]); # find weapon in round i	
+			$a = array_column($a, "NomeArma", "Tipologia"); # remap as Tipologia => NomeArma
+			$r["ArmaPrimaria"] = $a["Primaria"] ?? ""; # add weapon if present
+			$r["ArmaSecondaria"] = $a["Secondaria"] ?? "";
+			$_VARS["rows"][] = $r;
+		}
 		$_VARS["body"] = get_include_contents("./src/stats/detail.php");
+		break;
+	case "round":
+		$_VARS["match"] = $_GET["id"];
+		$_VARS["round"] = $_GET["num"];
+		$_VARS["body"] = get_include_contents("./src/stats/round.php");
 		break;
 	case "op4": # time span win ratio
 		$_VARS["op"] = "op4";

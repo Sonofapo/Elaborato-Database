@@ -151,7 +151,6 @@ class DB {
 
 	# operazione 9.0
 	public function esitoRound($squadra, $codice, $numero) {
-		# [TODO: controllare IF, passare valori come parametro]
 		return $this->query("SELECT Numero, Durata, IF(SquadraVincente = ?, ?, ?) AS Esito
 				FROM round WHERE CodicePartita = ? AND Numero = ?",
 			[$squadra, 'Vittoria', 'Sconfitta', $codice, $numero], "sssii");
@@ -174,9 +173,9 @@ class DB {
 
 	# operazione 10
 	public function storicoArmi($codice, $giocatore) {
-		return $this->query("SELECT r.NumerRound, p.NomeArma FROM round r, possessi p
-			WHERE r.CodicePartita = ? AND p.CodiceGiocatore = ? AND r.CodicePartita = p.CodicePartitaRound
-		  	AND r.Numero = p.NumeroRound", [$codice, $giocatore], "ii");
+		return $this->query("SELECT p.NumeroRound, p.NomeArma, a.Tipologia FROM possessi p, armi a
+			WHERE p.CodicePartitaRound = ? AND p.CodiceGiocatore = ? AND p.NomeArma = a.Nome",
+			[$codice, $giocatore], "ii");
 	}
 
 	# operazione 11
@@ -190,6 +189,7 @@ class DB {
 	}
 
 	# operazione 12
+	# [TODO: RIFARE QUERY 12, SBAGLIATA? UCCISIONI INCONSISTENTI: ARMA NON POSSEDUTA]
 	public function conteggioEliminazioni($codice, $giocatore) {
 		return $this->query("SELECT p.NomeArma, COUNT(DISTINCT p.CodicePartitaRound, p.NumeroRound,
 			p.NomeArma, p.CodiceGiocatore) AS Possessi FROM round r, possessi p, uccisioni u
@@ -201,12 +201,12 @@ class DB {
 	/** SUPPORT FUNCTIONS */
 	public function getTeam($username, $codice) {
 		return $this->query("SELECT NomeSquadra FROM giocatori WHERE UsernameUtente = ? AND CodicePartita = ?",
-			[$username, $codice], "si");
+			[$username, $codice], "si")[0]["NomeSquadra"];
 	}
 
 	public function getGiocatore($username, $codice) {
 		return $this->query("SELECT Codice FROM giocatori WHERE UsernameUtente = ? AND CodicePartita = ?",
-			[$username, $codice], "si");
+			[$username, $codice], "si")[0]["Codice"];
 	}
 
 }

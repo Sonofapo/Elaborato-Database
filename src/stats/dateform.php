@@ -21,5 +21,10 @@
 
 	<button type="submit">Esegui</button>
 </form>
-
+<script>
+	document.querySelector("input#dateTo").value = new Date().toISOString().slice(0, 10);
+	var fiveDaysAgo = new Date();
+	fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+	document.querySelector("input#dateFrom").value = fiveDaysAgo.toISOString().slice(0, 10);
+</script>
 <?php endif ?>

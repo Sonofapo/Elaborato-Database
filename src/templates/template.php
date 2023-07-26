@@ -11,7 +11,8 @@
 </head>
 <body>
 	<?php echo $_VARS["body"] ?>
-	<div style="margin-top: 10px">Torna <a href="javascript:history.back()">indietro</a></div>
-	<div style="margin-top: 10px">Torna alla <a href="index.php">home</a></div>
+	<div style="margin-top: 10px">
+		Torna <a href="javascript:history.back()">indietro</a> oppure alla <a href="index.php">home</a>
+	</div>
 </body>
 </html>

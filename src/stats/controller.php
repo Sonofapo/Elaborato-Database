@@ -8,7 +8,7 @@ switch ($_VARS["mode"]) {
 		$_VARS["rows"] = $db->esitoPartite($_SESSION["uid"]);
 		$_VARS["body"] = get_include_contents("./src/stats/games.php");
 		break;
-	case "detail"; # op8/op9/op10
+	case "detail": # op8/op9/op10
 		# outcome
 		$_VARS["match"] = $_GET["id"];
 		$res  = $db->conteggioRound($_GET["id"])[0];
@@ -32,6 +32,8 @@ switch ($_VARS["mode"]) {
 	case "round":
 		$_VARS["match"] = $_GET["id"];
 		$_VARS["round"] = $_GET["num"];
+		$_VARS["kills"] = $db->elencoUccisioni($_VARS["match"], $_VARS["round"]);
+		$_VARS["actions"] = $db->elencoAzioni($_VARS["match"], $_VARS["round"]);
 		$_VARS["body"] = get_include_contents("./src/stats/round.php");
 		break;
 	case "op4": # time span win ratio

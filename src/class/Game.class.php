@@ -46,7 +46,7 @@ class Game {
 
 		foreach ([ "Alpha", "Beta" ] as $team) { # random purchases for each team
 			foreach ($this->$team as &$t) { # and for each member
-				$t["a"] = $armaS = $this->DB->getRandomWeapon("Secondaria")[0]["Nome"];
+				$t["a"] = [$armaS = $this->DB->getRandomWeapon("Secondaria")[0]["Nome"]];
 				$this->DB->savePurchase($this->Codice, $this->round, $armaS, $t["c"]);
 				if (rand() % 100 < 70) {
 					$t["a"][] = $armaP = $this->DB->getRandomWeapon("Primaria")[0]["Nome"];

@@ -3,6 +3,7 @@
 <head>
 	<title>Elaborato Database</title>
 
+	<script src="./js/script.js"></script>
 	<link rel="stylesheet" href="./css/style.css" />
 
 	<meta charset="UTF-8" />

@@ -62,10 +62,9 @@ switch ($_VARS["mode"]) {
 		$_VARS["body"] = get_include_contents("./src/stats/rawdata.php");
 		break;
 	case "play":
-		$link = '<a href="index.php">Torna indietro</a>';
 		$game = new Game($db, $_SESSION["uid"]);
 		$game->simulate();
-		die("La partita è stata simultata. $link");
+		die("La partita è stata simultata");
 }
 
 ?>

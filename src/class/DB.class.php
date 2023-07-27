@@ -198,6 +198,11 @@ class DB {
 			GROUP BY p.NomeArma", [$codice, $giocatore], "ii");
 	}
 
+	public function getTeamComposition($codice) {
+		return $this->query("SELECT UsernameUtente, NomeAgente, NomeSquadra FROM giocatori
+		WHERE CodicePartita = ? ORDER BY NomeSquadra, NomeAgente", [$codice], "i");
+	}
+
 	/** SUPPORT FUNCTIONS */
 	public function getTeam($username, $codice) {
 		return $this->query("SELECT NomeSquadra FROM giocatori WHERE UsernameUtente = ? AND CodicePartita = ?",

@@ -11,6 +11,7 @@ switch ($_VARS["mode"]) {
 	case "detail": # op8/op9/op10
 		# outcome
 		$_VARS["match"] = $_GET["id"];
+		$_VARS["teams"] = $db->getTeamComposition($_GET["id"]);
 		$res  = $db->conteggioRound($_GET["id"])[0];
 		$team = $db->getTeam($_SESSION["uid"], $_GET["id"]);
 		if ($res["SquadraVincente"] == $team)

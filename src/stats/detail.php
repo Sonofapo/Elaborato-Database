@@ -1,5 +1,12 @@
 <h1>Partita <?php echo $_VARS["match"] ?> - Esito: <?php echo $_VARS["outcome"] ?></h1>
 
+<h2>Composizione squadre</h2>
+<?php
+foreach ($_VARS["teams"] as &$r)
+	$table = generate_table($_VARS["teams"]);
+echo $table;
+?>
+<h2>Elenco dei round</h2>
 <?php
 foreach ($_VARS["rows"] as &$r)
 	$r["Dettaglio"] = "<a href='?action=stats&mode=round&id={$_VARS["match"]}&num={$r["Numero"]}'>link</a>";

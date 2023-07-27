@@ -41,8 +41,8 @@ class DB {
 	/** SIMULTATION FUNCTIONS */
 	public function getRandomUsers($username) {
 		$res = $this->query("(SELECT Username FROM utenti WHERE Username = ?) UNION
-			(SELECT Username FROM utenti WHERE Username <> ? ORDER BY RAND() LIMIT 9) ORDER BY RAND()",
-			[$username, $username], "ss");
+			(SELECT Username FROM utenti WHERE Username <> ? AND Password IS NOT NULL ORDER BY RAND() LIMIT 9)
+			ORDER BY RAND()", [$username, $username], "ss");
 		return array_map(fn($x) => $x['Username'], $res); # remap array to username list
 	}
 
